@@ -3,7 +3,7 @@
 ## Requirements
 
 - Node.js 18 or newer and npm.
-- MongoDB running locally, or a MongoDB connection string you can use.
+- No database server is required. The API stores data in a local SQLite file.
 
 ## Setup
 
@@ -20,7 +20,7 @@
    ```
 
    - `PORT`: HTTP port (defaults to `3000`).
-   - `MONGODB_URI`: MongoDB connection string.
+   - `DB_FILE`: SQLite database file path (defaults to `./data/commerce.sqlite`).
    - `JWT_SECRET`: long, random signing secret. Replace the example value before running the API.
    - `JWT_EXPIRES_IN`: token lifetime accepted by `jsonwebtoken` (defaults to `1d`).
 
@@ -40,4 +40,6 @@ Run the six integration tests with:
 npm test
 ```
 
-Tests use `mongodb-memory-server`, so no separate MongoDB service is needed for the test suite. Its MongoDB binary may be downloaded the first time tests run. Four tests are expected to fail until the documented business-logic exercises are corrected; the two authentication regression checks should pass.
+Tests use an in-memory SQLite database and do not need a database server or network access. Four tests are expected to fail until the documented business-logic exercises are corrected; the two authentication regression checks should pass.
+
+The local database file is created automatically when the API starts. Keep `data/commerce.sqlite` to preserve data between runs; back it up like any other local data file. To use a different location, change `DB_FILE`.

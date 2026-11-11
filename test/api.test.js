@@ -1,12 +1,11 @@
+process.env.DB_FILE = ':memory:';
 process.env.JWT_SECRET = 'test-secret-with-sufficient-length';
 
-const mongoose = require('mongoose');
+const { randomBytes } = require('node:crypto');
 const request = require('supertest');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const app = require('../src/app');
-const { User, Product, Cart, Order } = require('../src/models');
+const db = require('../src/database');
 
-let mongoServer;
 let product;
 
 async function registerAndGetToken() {
@@ -21,19 +20,19 @@ async function registerAndGetToken() {
   return response.body.token;
 }
 
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  await mongoose.connect(mongoServer.getUri());
+beforeEach(() => {
+  db.exec('DELETE FROM order_items; DELETE FROM orders; DELETE FROM cart_items; DELETE FROM carts; DELETE FROM products; DELETE FROM users;');
+  const id = randomBytes(12).toString('hex');
+  const now = new Date().toISOString();
+  db.prepare(`
+    INSERT INTO products (id, name, description, category, price, stock, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, 'Canvas Bag', '', 'bags', 12, 10, now, now);
+  product = { id };
 });
 
-beforeEach(async () => {
-  await Promise.all([User.deleteMany({}), Product.deleteMany({}), Cart.deleteMany({}), Order.deleteMany({})]);
-  product = await Product.create({ name: 'Canvas Bag', category: 'bags', price: 12, stock: 10 });
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
+afterAll(() => {
+  db.close();
 });
 
 test('rejects login with an incorrect password', async () => {
@@ -53,10 +52,13 @@ test('denies protected cart access without a valid token', async () => {
 });
 
 test('returns the requested first page when listing products', async () => {
-  await Product.create([
-    { name: 'A Bag', category: 'bags', price: 8, stock: 5 },
-    { name: 'B Bag', category: 'bags', price: 9, stock: 5 }
-  ]);
+  const now = new Date().toISOString();
+  const insertProduct = db.prepare(`
+    INSERT INTO products (id, name, description, category, price, stock, created_at, updated_at)
+    VALUES (?, ?, '', ?, ?, ?, ?, ?)
+  `);
+  insertProduct.run(randomBytes(12).toString('hex'), 'A Bag', 'bags', 8, 5, now, now);
+  insertProduct.run(randomBytes(12).toString('hex'), 'B Bag', 'bags', 9, 5, now, now);
 
   const response = await request(app).get('/api/products?page=1&limit=2&category=bags').expect(200);
   expect(response.body.items.map((item) => item.name)).toEqual(['A Bag', 'B Bag']);
@@ -80,8 +82,7 @@ test('sets a cart item quantity to the requested value', async () => {
 });
 
 test('rejects an order when requested quantity exceeds available stock', async () => {
-  product.stock = 1;
-  await product.save();
+  db.prepare('UPDATE products SET stock = 1 WHERE id = ?').run(product.id);
   const token = await registerAndGetToken();
   await request(app)
     .post('/api/cart/items')
@@ -93,7 +94,7 @@ test('rejects an order when requested quantity exceeds available stock', async (
     .post('/api/orders')
     .set('Authorization', `Bearer ${token}`)
     .expect(409);
-  expect((await Product.findById(product.id)).stock).toBe(1);
+  expect(db.prepare('SELECT stock FROM products WHERE id = ?').get(product.id).stock).toBe(1);
 });
 
 test('calculates the order total from each unit price and quantity', async () => {

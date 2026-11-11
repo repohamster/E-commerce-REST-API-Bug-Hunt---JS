@@ -1,6 +1,6 @@
 # Commerce REST API Training Project
 
-A Node.js, Express, and MongoDB REST API for user accounts, product browsing, carts, and orders. The project includes six Jest and Supertest integration tests. Four tests expose intentional business-logic defects; the password and authorization tests are security regression checks and pass as provided.
+A Node.js and Express REST API for user accounts, product browsing, carts, and orders, using a local SQLite database. No MongoDB server, Atlas account, or Compass installation is required. The project includes six Jest and Supertest integration tests. Four tests expose intentional business-logic defects; the password and authorization tests are security regression checks and pass as provided.
 
 ## Features
 
@@ -8,7 +8,8 @@ A Node.js, Express, and MongoDB REST API for user accounts, product browsing, ca
 - Browse products by category and price range with pagination.
 - Add products to a user's cart, inspect totals, and change item quantities.
 - Place orders and update inventory.
-- Run integration tests against an isolated in-memory MongoDB instance.
+- Persist application data in a local SQLite database file.
+- Run integration tests against an isolated in-memory SQLite database.
 
 ## API
 
@@ -30,4 +31,4 @@ Product list responses contain `items`, `page`, `limit`, `total`, and `pages`. O
 
 The intentionally incorrect pagination, cart quantity update, checkout stock validation, and order total behavior are described in [BUGS.md](BUGS.md). Authentication is intentionally implemented securely; its two tests guard against accepting an incorrect password or allowing unauthenticated cart access.
 
-See [INSTRUCTIONS.md](INSTRUCTIONS.md) for installation and execution.
+See [INSTRUCTIONS.md](INSTRUCTIONS.md) for installation and execution. The database file defaults to `data/commerce.sqlite` and can be changed with `DB_FILE`.
