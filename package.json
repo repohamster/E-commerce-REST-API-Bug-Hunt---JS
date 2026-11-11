@@ -1,0 +1,29 @@
+{
+  "name": "commerce-rest-api-training",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Express and MongoDB e-commerce API with regression exercises",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.1.4",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/test/**/*.test.js"]
+  }
+}
