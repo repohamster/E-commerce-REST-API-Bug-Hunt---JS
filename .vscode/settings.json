@@ -1,0 +1,8 @@
+{
+  "editor.inlineSuggest.enabled": false,
+  "github.copilot.inlineSuggest.enable": false,
+  "github.copilot.editor.enableCodeActions": false,
+  "github.copilot.advanced": {
+    "inlineSuggestCount": 0
+  }
+}
