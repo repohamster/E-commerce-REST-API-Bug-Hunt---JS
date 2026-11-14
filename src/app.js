@@ -165,7 +165,7 @@ app.patch('/api/cart/items/:productId', requireAuth, async (req, res, next) => {
     `).get(cart.id, req.params.productId);
     if (!item) return res.status(404).json({ error: 'Cart item not found' });
 
-    const updatedQuantity =  quantity;
+    const updatedQuantity = item.quantity + quantity;
     db.prepare(`
       UPDATE cart_items SET quantity = ? WHERE cart_id = ? AND product_id = ?
     `).run(updatedQuantity, cart.id, item.productId);
