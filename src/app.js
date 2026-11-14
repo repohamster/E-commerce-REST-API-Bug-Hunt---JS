@@ -189,7 +189,7 @@ app.post('/api/orders', requireAuth, async (req, res, next) => {
 
     const orderItems = [];
     for (const item of items) {
-      if (item.stock < 0) return res.status(409).json({ error: `Insufficient stock for ${item.name}` });
+      if (item.stock - item.quantity < 0) return res.status(409).json({ error: `Insufficient stock for ${item.name}` });
       orderItems.push({
         productId: item.productId,
         name: item.name,
