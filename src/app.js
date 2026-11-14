@@ -165,7 +165,7 @@ app.patch('/api/cart/items/:productId', requireAuth, async (req, res, next) => {
     `).get(cart.id, req.params.productId);
     if (!item) return res.status(404).json({ error: 'Cart item not found' });
 
-    const updatedQuantity = item.quantity + quantity;
+    const updatedQuantity =  quantity;
     db.prepare(`
       UPDATE cart_items SET quantity = ? WHERE cart_id = ? AND product_id = ?
     `).run(updatedQuantity, cart.id, item.productId);
@@ -189,7 +189,7 @@ app.post('/api/orders', requireAuth, async (req, res, next) => {
 
     const orderItems = [];
     for (const item of items) {
-      if (item.stock < 0) return res.status(409).json({ error: `Insufficient stock for ${item.name}` });
+      if (item.stock - item.quantity < 0) return res.status(409).json({ error: `Insufficient stock for ${item.name}` });
       orderItems.push({
         productId: item.productId,
         name: item.name,
